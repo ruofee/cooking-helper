@@ -16,7 +16,7 @@ export default defineNuxtConfig({
     blobToken: process.env.BLOB_READ_WRITE_TOKEN,
     // public key（服务端和客户端都可用）
     public: {
-      kvRestApiUrl: process.env.KV_URL,
+      kvRestApiUrl: process.env.KV_REST_API_URL,
       kvRestApiToken: process.env.KV_REST_API_TOKEN,
     }
   },
