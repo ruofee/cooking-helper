@@ -1,6 +1,8 @@
 import { createClient } from '@vercel/kv'
 
+const config = useRuntimeConfig()
+
 export const kv = createClient({
-  url: process.env.KV_URL,
-  token: process.env.KV_REST_API_TOKEN,
+  url: config.public.kvRestApiUrl,
+  token: config.public.kvRestApiToken
 })

@@ -11,6 +11,16 @@ export default defineNuxtConfig({
     '@vant/nuxt'
   ],
   
+  runtimeConfig: {
+    // 私有 key（仅在服务端可用）
+    blobToken: process.env.BLOB_READ_WRITE_TOKEN,
+    // public key（服务端和客户端都可用）
+    public: {
+      kvRestApiUrl: process.env.KV_URL,
+      kvRestApiToken: process.env.KV_REST_API_TOKEN,
+    }
+  },
+  
   vant: {
     /** Vant 配置项 */
   }

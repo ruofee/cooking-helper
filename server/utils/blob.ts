@@ -1,5 +1,7 @@
 import { put } from '@vercel/blob'
 
+const config = useRuntimeConfig()
+
 export const uploadToBlob = async (base64Image: string) => {
   if (!base64Image) return null
 
@@ -10,7 +12,7 @@ export const uploadToBlob = async (base64Image: string) => {
   // 上传到 Vercel Blob
   const { url } = await put(`recipes/${Date.now()}.jpg`, blob, {
     access: 'public',
-    token: process.env.BLOB_READ_WRITE_TOKEN
+    token: config.blobToken
   })
 
   return url
