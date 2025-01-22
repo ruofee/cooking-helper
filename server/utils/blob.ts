@@ -1,6 +1,18 @@
-import { put } from '@vercel/blob'
+import { put, del } from '@vercel/blob'
 
 const config = useRuntimeConfig()
+
+export const deleteFromBlob = async (url: string) => {
+  if (!url) return
+  
+  try {
+    await del(url, {
+      token: config.blobToken
+    })
+  } catch (error) {
+    console.error('删除图片失败:', error)
+  }
+}
 
 export const uploadToBlob = async (base64Image: string) => {
   if (!base64Image) return null

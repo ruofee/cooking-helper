@@ -29,6 +29,13 @@ export const useRecipes = () => {
   }
 
   const deleteRecipe = async (recipe: Recipe) => {
+    if (recipe.image) {
+      await $fetch('/api/upload', {
+        method: 'DELETE',
+        body: { url: recipe.image }
+      })
+    }
+
     recipes.value = recipes.value.filter(r => r.id !== recipe.id)
     await saveRecipes()
   }

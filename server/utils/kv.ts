@@ -4,5 +4,5 @@ const config = useRuntimeConfig()
 
 export const kv = createClient({
   url: config.public.kvRestApiUrl,
-  token: config.public.kvRestApiToken
+  token: config.public.kvRestApiToken,
 })

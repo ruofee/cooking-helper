@@ -23,11 +23,14 @@ const handleImageUpload = (file) => {
   reader.readAsDataURL(file.file)
 }
 
+const loading = ref(false)
+
 const submitForm = async () => {
   if (!formData.value.name || !formData.value.ingredients || !formData.value.steps) {
     return
   }
 
+  loading.value = true
   try {
     // 先上传图片
     const imageUrl = await $fetch('/api/upload', {
@@ -60,6 +63,8 @@ const submitForm = async () => {
       message: '保存失败'
     })
     console.error('保存失败:', error)
+  } finally {
+    loading.value = false
   }
 }
 </script>
@@ -121,7 +126,14 @@ const submitForm = async () => {
       </van-cell-group>
 
       <div class="submit-btn">
-        <van-button round block type="primary" native-type="submit">
+        <van-button 
+          round 
+          block 
+          type="primary" 
+          native-type="submit"
+          :loading="loading"
+          loading-text="保存中..."
+        >
           保存
         </van-button>
       </div>
