@@ -1,6 +1,8 @@
 <script setup>
+import { showToast } from 'vant'
+
 const router = useRouter()
-const recipes = useState('recipes')
+const { addRecipe } = useRecipes()
 const fileList = ref([])
 
 const formData = ref({
@@ -21,37 +23,43 @@ const handleImageUpload = (file) => {
   reader.readAsDataURL(file.file)
 }
 
-const submitForm = () => {
-  // 表单验证
+const submitForm = async () => {
   if (!formData.value.name || !formData.value.ingredients || !formData.value.steps) {
     return
   }
 
-  // 创建新菜谱
-  const newRecipe = {
-    id: Date.now(),
-    name: formData.value.name,
-    date: formData.value.date,
-    rating: formData.value.rating,
-    ingredients: formData.value.ingredients,
-    steps: formData.value.steps,
-    image: formData.value.image
-  }
-  
-  // 添加到菜谱列表
-  if (!recipes.value) {
-    recipes.value = []  // 确保 recipes 已初始化
-  }
-  recipes.value.unshift(newRecipe)
-  
-  // 保存到本地存储
-  if (import.meta.client) {
-    try {
-      localStorage.setItem('recipes', JSON.stringify(recipes.value))
-      router.push('/recipes')
-    } catch (error) {
-      console.error('保存失败:', error)
+  try {
+    // 先上传图片
+    const imageUrl = await $fetch('/api/upload', {
+      method: 'POST',
+      body: {
+        image: formData.value.image
+      }
+    })
+
+    // 创建新菜谱
+    const newRecipe = {
+      id: Date.now(),
+      name: formData.value.name,
+      date: formData.value.date,
+      rating: formData.value.rating,
+      ingredients: formData.value.ingredients,
+      steps: formData.value.steps,
+      image: imageUrl
     }
+    
+    await addRecipe(newRecipe)
+    showToast({
+      type: 'success',
+      message: '保存成功'
+    })
+    router.push('/recipes')
+  } catch (error) {
+    showToast({
+      type: 'fail',
+      message: '保存失败'
+    })
+    console.error('保存失败:', error)
   }
 }
 </script>

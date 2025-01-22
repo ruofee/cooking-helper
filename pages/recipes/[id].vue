@@ -1,19 +1,42 @@
 <script setup>
+import { showToast } from 'vant'
 const route = useRoute()
 const router = useRouter()
-const { recipes, getRecipe, deleteRecipe } = useRecipes()
+const { recipes, loadRecipes, getRecipe, deleteRecipe } = useRecipes()
 const showActions = ref(false)
+const loading = ref(true)
+
+onMounted(async () => {
+  try {
+    await loadRecipes()
+  } finally {
+    loading.value = false
+  }
+})
 
 const recipe = computed(() => getRecipe(route.params.id))
 
-const handleDelete = () => {
-  deleteRecipe(recipe.value)
-  router.push('/recipes')
-}
+// 监听 recipe 的变化，只有在数据加载完成后才判断是否存在
+watch([recipe, loading], ([newRecipe, isLoading]) => {
+  if (!isLoading && !newRecipe) {
+    router.push('/recipes')
+  }
+})
 
-// 如果菜品不存在，返回列表页
-if (!recipe.value) {
-  router.push('/recipes')
+const handleDelete = async () => {
+  try {
+    await deleteRecipe(recipe.value)
+    showToast({
+      type: 'success',
+      message: '删除成功'
+    })
+    router.push('/recipes')
+  } catch (error) {
+    showToast({
+      type: 'fail',
+      message: '删除失败'
+    })
+  }
 }
 
 useHead({
@@ -36,7 +59,9 @@ useHead({
       </template>
     </van-nav-bar>
 
-    <div v-if="recipe" class="recipe-content">
+    <van-loading v-if="loading" class="loading" type="spinner" />
+    
+    <div v-else-if="recipe" class="recipe-content">
       <div class="header-section">
         <van-image v-if="recipe.image" :src="recipe.image" width="80" height="80" fit="cover" radius="4" />
         <div class="header-info">
@@ -251,5 +276,12 @@ useHead({
 
 :deep(.delete-action .van-cell__title) {
   text-align: center;
+}
+.loading {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 100;
 }
 </style>

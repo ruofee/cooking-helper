@@ -1,14 +1,34 @@
 <script setup>
+import { showToast } from 'vant'
 const { recipes, loadRecipes, deleteRecipe } = useRecipes()
-
-onMounted(() => {
-  loadRecipes()
-})
-
+const loading = ref(true)
 const router = useRouter()
+
+onMounted(async () => {
+  try {
+    await loadRecipes()
+  } finally {
+    loading.value = false
+  }
+})
 
 const goToNewRecipe = () => {
   router.push('/recipes/new')
+}
+
+const handleDelete = async (recipe) => {
+  try {
+    await deleteRecipe(recipe)
+    showToast({
+      type: 'success',
+      message: '删除成功'
+    })
+  } catch (error) {
+    showToast({
+      type: 'fail',
+      message: '删除失败'
+    })
+  }
 }
 </script>
 
@@ -21,53 +41,57 @@ const goToNewRecipe = () => {
     />
 
     <div class="recipes-content">
-      <van-empty v-if="recipes.length === 0" description="还没有添加任何菜谱，开始记录第一道菜吧！" />
+      <van-loading v-if="loading" class="loading" type="spinner" />
       
-      <van-cell-group v-else>
-        <transition-group name="list">
-          <van-swipe-cell v-for="recipe in recipes" :key="recipe.id">
-            <van-cell
-              :title="recipe.name"
-              :label="recipe.date"
-              is-link
-              center
-              @click="router.push(`/recipes/${recipe.id}`)"
-            >
-              <template #icon>
-                <div v-if="recipe.image" class="recipe-image-container">
-                  <van-image
-                    :src="recipe.image"
-                    fit="cover"
-                    position="center"
-                    width="48"
-                    height="48"
-                  />
-                </div>
+      <template v-else>
+        <van-empty v-if="recipes.length === 0" description="还没有添加任何菜谱，开始记录第一道菜吧！" />
+        
+        <van-cell-group v-else>
+          <transition-group name="list">
+            <van-swipe-cell v-for="recipe in recipes" :key="recipe.id">
+              <van-cell
+                :title="recipe.name"
+                :label="recipe.date"
+                is-link
+                center
+                @click="router.push(`/recipes/${recipe.id}`)"
+              >
+                <template #icon>
+                  <div v-if="recipe.image" class="recipe-image-container">
+                    <van-image
+                      :src="recipe.image"
+                      fit="cover"
+                      position="center"
+                      width="48"
+                      height="48"
+                    />
+                  </div>
+                </template>
+                <template #right-icon>
+                  <div class="rating">
+                    <van-icon 
+                      v-for="i in recipe.rating" 
+                      :key="i" 
+                      name="star" 
+                      color="#ffd21e"
+                    />
+                  </div>
+                </template>
+              </van-cell>
+              
+              <template #right>
+                <van-button 
+                  square 
+                  text="删除" 
+                  type="danger" 
+                  class="delete-button" 
+                  @click="handleDelete(recipe)"
+                />
               </template>
-              <template #right-icon>
-                <div class="rating">
-                  <van-icon 
-                    v-for="i in recipe.rating" 
-                    :key="i" 
-                    name="star" 
-                    color="#ffd21e"
-                  />
-                </div>
-              </template>
-            </van-cell>
-            
-            <template #right>
-              <van-button 
-                square 
-                text="删除" 
-                type="danger" 
-                class="delete-button" 
-                @click="deleteRecipe(recipe)"
-              />
-            </template>
-          </van-swipe-cell>
-        </transition-group>
-      </van-cell-group>
+            </van-swipe-cell>
+          </transition-group>
+        </van-cell-group>
+      </template>
     </div>
 
     <van-tabbar fixed placeholder>
@@ -143,5 +167,12 @@ const goToNewRecipe = () => {
 .list-leave-to {
   opacity: 0;
   transform: translateX(-30px);
+}
+
+.loading {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 </style>

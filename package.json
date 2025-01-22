@@ -10,6 +10,7 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@vercel/blob": "^0.27.1",
     "@vercel/kv": "^3.0.0",
     "nuxt": "^3.15.2",
     "vant": "^4.9.16",
