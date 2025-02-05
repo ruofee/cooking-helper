@@ -1,24 +1,19 @@
 <script setup>
 import { showToast } from 'vant'
-const { recipes, loadRecipes, deleteRecipe } = useRecipes()
-const loading = ref(true)
 const router = useRouter()
 
-onMounted(async () => {
-  try {
-    await loadRecipes()
-  } finally {
-    loading.value = false
-  }
-})
+// 使用 useLazyFetch 替代 useFetch
+const { data: recipes, refresh, status } = await useLazyFetch('/api/recipes')
 
 const goToNewRecipe = () => {
   router.push('/recipes/new')
 }
 
+
 const handleDelete = async (recipe) => {
   try {
     await deleteRecipe(recipe)
+    await refresh()  // 删除后刷新数据
     showToast({
       type: 'success',
       message: '删除成功'
@@ -41,10 +36,10 @@ const handleDelete = async (recipe) => {
     />
 
     <div class="recipes-content">
-      <van-loading v-if="loading" class="loading" type="spinner" />
+      <van-loading v-if="status === 'pending'" class="loading" type="spinner" />
       
       <template v-else>
-        <van-empty v-if="recipes.length === 0" description="还没有添加任何菜谱，开始记录第一道菜吧！" />
+        <van-empty v-if="!recipes?.length" description="还没有添加任何菜谱，开始记录第一道菜吧！" />
         
         <van-cell-group v-else>
           <transition-group name="list">
